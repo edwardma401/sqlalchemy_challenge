@@ -19,7 +19,9 @@ def home():
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
-        f"/api/v1.0/tobs"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/<start><br/>"
+        f"/api/v1.0/<start>/<end>"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -64,5 +66,19 @@ def most_active_station_temperature_observed():
 
     return jsonify(all_tobs)
 
+@app.route("/api/v1.0/<start>")
+def startdate(start):
+
+    session = Session(engine)
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).all()
+    return jsonify(results)
+    session.close()
+
+@app.route("/api/v1.0/<start>/<end>")
+def start_and_end(start, end):
+    session = Session(engine)
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    return jsonify(results)
+    session.close()
 if __name__=='__main__':
     app.run(debug=True)
